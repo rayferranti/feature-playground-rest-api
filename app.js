@@ -4,7 +4,7 @@ const util = require('util');
 
 const models = require('./models/index');
 
-const error_messages = null;
+const errorMessages = null;
 
 function getAllBoards(request, response, next){
   models.Board.findAll({}).then((boards) => {
@@ -25,9 +25,27 @@ function getBoard(request, response, next){
   });
 };
 function verifyRequiredParams(request){
+  console.log("here");
+  request.assert('title', 'title is a required field').notEmpty;
+  const errors = request.validationErrors();
+  if (errors) { 
+    console.log(errors);
+    errorMessages = {
+      error: 'true',
+      message: util.inspect(errors)
+    };
+    return false;
+  }
+  return true;
 
 };
 function addBoard(request, response, next){
+  if (!verifyRequiredParams(request)) {
+    response.send(422, errorMessages);
+    return;
+  }
+  response.send(request.params);
+  next();
 
 };
 function updateBoard(request, response, next){
