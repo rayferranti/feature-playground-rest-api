@@ -62,17 +62,23 @@ function updateBoard(request, response, next){
   if (!verifyRequiredParams(request)) {
     response.send(422, errorMessages);
   }
-  models.Board.find({where: { 'id': request.params.id}}).then((board) => {
-      board.updateAttributes({title: request.params['title']}).then((updatedBoard) => {
-        const data = {
-          error: 'false',
-          message: 'Updated board successfully',
-          data: updatedBoard
-        };
-        response.send(data);
-        next();
+  models.Board.find({where: { 'id': request.params.id}})
+    .then((board) => {
+      if (!board) {
+        response.send(422, "Not a valid resource");
+        return;
+      }
+      board.updateAttributes({title: request.params['title']})
+        .then((updatedBoard) => {
+          const data = {
+            error: 'false',
+            message: 'Updated board successfully',
+            data: updatedBoard
+          };
+          response.send(data);
+          next();
+        });
       });
-  });
 };
 
 function deleteBoard(request, response, next){
