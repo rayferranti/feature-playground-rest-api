@@ -6,24 +6,6 @@ const models = require('./models/index');
 
 let errorMessages = null;
 
-function getAllBoards(request, response, next){
-  models.Board.findAll({}).then((boards) => {
-    const data = { error: 'false', data: boards };
-    response.send(data);
-    next();
-  })
-};
-function getBoard(request, response, next){
-  models.Board.find({
-    where: {
-      'id': request.params.id
-    }
-  }).then((board) => {
-      const data = {error: 'false', data: board};
-      response.send(data);
-      next();
-  });
-};
 function verifyRequiredParams(request){
   request.assert('title', 'title is a required field').notEmpty();
   const errors = request.validationErrors();
@@ -37,6 +19,27 @@ function verifyRequiredParams(request){
   return true;
 
 };
+
+function getAllBoards(request, response, next){
+  models.Board.findAll({}).then((boards) => {
+    const data = { error: 'false', data: boards };
+    response.send(data);
+    next();
+  })
+};
+
+function getBoard(request, response, next){
+  models.Board.find({
+    where: {
+      'id': request.params.id
+    }
+  }).then((board) => {
+      const data = {error: 'false', data: board};
+      response.send(data);
+      next();
+  });
+};
+
 function addBoard(request, response, next){
   if (!verifyRequiredParams(request)) {
     response.send(422, errorMessages);
@@ -54,9 +57,24 @@ function addBoard(request, response, next){
       next();
   });
 };
-function updateBoard(request, response, next){
 
+function updateBoard(request, response, next){
+  if (!verifyRequiredParams(request)) {
+    response.send(422, errorMessages);
+  }
+  models.Board.find({where: { 'id': request.params.id}}).then((board) => {
+      board.updateAttributes({title: request.params['title']}).then((updatedBoard) => {
+        const data = {
+          error: 'false',
+          message: 'Updated board successfully',
+          data: updatedBoard
+        };
+        response.send(data);
+        next();
+      });
+  });
 };
+
 function deleteBoard(request, response, next){
 
 };
