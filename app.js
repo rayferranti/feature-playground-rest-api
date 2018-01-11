@@ -4,7 +4,7 @@ const util = require('util');
 
 const models = require('./models/index');
 
-const errorMessages = null;
+let errorMessages = null;
 
 function getAllBoards(request, response, next){
   models.Board.findAll({}).then((boards) => {
@@ -25,11 +25,9 @@ function getBoard(request, response, next){
   });
 };
 function verifyRequiredParams(request){
-  console.log("here");
-  request.assert('title', 'title is a required field').notEmpty;
+  request.assert('title', 'title is a required field').notEmpty();
   const errors = request.validationErrors();
-  if (errors) { 
-    console.log(errors);
+  if (errors) {
     errorMessages = {
       error: 'true',
       message: util.inspect(errors)
@@ -44,9 +42,17 @@ function addBoard(request, response, next){
     response.send(422, errorMessages);
     return;
   }
-  response.send(request.params);
-  next();
-
+  models.Board.create({
+    title: request.params['title']
+  }).then((board) => {
+      const data = {
+        error: "false",
+        message: "New contact created successfully",
+        data: board
+      };
+      response.send(data);
+      next();
+  });
 };
 function updateBoard(request, response, next){
 
